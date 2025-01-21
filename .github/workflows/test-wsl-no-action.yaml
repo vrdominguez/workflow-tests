@@ -10,13 +10,14 @@ jobs:
     name: Test WSL NO ACTION
     runs-on: windows-2022
     steps:
-      - name: Check WSL Version
-        run: wsl --version
-
-      - name: Setup WSL
-        run: |
+      - name: Update WSL
+        run: \
+          wsl --update
+          wsl --version
           wsl --set-default-version 2
-          wsl --install -d Ubuntu-24.04
+
+      - name: Install distro
+        run: wsl --install -d Ubuntu-24.04
       
       - name: List installed WSL
         run: wsl --list --all
