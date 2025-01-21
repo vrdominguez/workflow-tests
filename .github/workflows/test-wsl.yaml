@@ -16,6 +16,7 @@ jobs:
           set-as-default: true
     
       - name: Test commands
+        shell: wsl-bash {0}
         run: |
             cat /etc/issue.net
             uname -a
