@@ -9,8 +9,31 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Install virtualbox
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Add vagrant repo
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/vagrant.list
+          sudo apt-get update -qq
+      
+      - name: Install vagrant and virtualbox
         run: |
           sudo apt-get update
-          sudo apt-get install -y -qq virtualbox
+          sudo apt-get install -y -qq virtualbox vagrant
           VBoxManage --version
+      
+      - name: Create vagrant box folder
+        run: |
+          mkdir -p box_folder
+      
+      - name: Create vagrant box:
+        working-directory: box_folder
+        run: |
+          vagrant init bento/ubuntu-24.04 --box-version 202502.21.0
+          vagrant up
+          vagrant destroy -f
+        
+      
+      
