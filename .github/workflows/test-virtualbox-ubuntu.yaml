@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir -p box_folder
       
-      - name: Create vagrant box:
+      - name: Create vagrant box
         working-directory: box_folder
         run: |
           vagrant init bento/ubuntu-24.04 --box-version 202502.21.0
