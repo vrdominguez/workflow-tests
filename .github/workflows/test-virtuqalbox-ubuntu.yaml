@@ -1,0 +1,16 @@
+name: Test install virtualbox
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-virtualbox:
+    name: Test Virtualbox install
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Install virtualbox
+        run: |
+          sudo apt-get update
+          sudo apt-get install y -qq virtualbox
+          VBoxManage --version
