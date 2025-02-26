@@ -28,26 +28,43 @@ jobs:
   summary-job:
     needs: matrix-job
     runs-on: ubuntu-24.04
-    if: always()  # Ensures this job runs even if a matrix job fails
+    if: always()  # Ensure this runs even if matrix-job fails
     steps:
-      - name: Fetch job results
+      - name: Install jq
+        run: sudo apt-get install -y jq  # Needed for JSON parsing
+
+      - name: Fetch job statuses using GITHUB_TOKEN
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.run_id }}
+          REPO: ${{ github.repository }}
         run: |
           echo "### Job Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Node.js Version | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|----------------|--------|" >> $GITHUB_STEP_SUMMARY
-          
-          # Check statuses
-          if [[ "${{ needs.matrix-job.result }}" == "success" ]]; then
-            for version in 14 16 18; do
+
+          # Fetch all jobs in the current workflow run
+          JOBS_JSON=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+                              -H "Accept: application/vnd.github+json" \
+                              "https://api.github.com/repos/$REPO/actions/runs/$RUN_ID/jobs")
+
+          # Track failure flag
+          JOB_FAILED=false
+
+          # Extract statuses dynamically
+          for version in 14 16 18; do
+            JOB_STATUS=$(echo "$JOBS_JSON" | jq -r ".jobs[] | select(.name | contains(\"$version\")) | .conclusion")
+            if [[ "$JOB_STATUS" == "success" ]]; then
               echo "| $version | ✅ Success |" >> $GITHUB_STEP_SUMMARY
-            done
-          else
-            for version in 14 16 18; do
-              if [[ $version == "16" ]]; then
-                echo "| $version | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
-              else
-                echo "| $version | ✅ Success |" >> $GITHUB_STEP_SUMMARY
-              fi
-            done
+            else
+              echo "| $version | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+              JOB_FAILED=true
+            fi
+          done
+
+          # Fail the job if any matrix job failed
+          if [[ "$JOB_FAILED" == "true" ]]; then
+            echo "One or more matrix jobs failed. Failing summary job."
+            exit 1
           fi
