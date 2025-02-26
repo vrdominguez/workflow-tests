@@ -1,0 +1,53 @@
+name: Matrix Job with Summary
+
+on: [push, pull_request]
+
+jobs:
+  matrix-job:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [14, 16, 18]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      
+      - name: Run tests
+        run: |
+          if [[ ${{ matrix.node-version }} == "16" ]]; then
+            echo "Simulating failure" && exit 1
+          fi
+          echo "Tests passed for Node.js ${{ matrix.node-version }}"
+
+  summary-job:
+    needs: matrix-job
+    runs-on: ubuntu-24.04
+    if: always()  # Ensures this job runs even if a matrix job fails
+    steps:
+      - name: Fetch job results
+        run: |
+          echo "### Job Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Node.js Version | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------------|--------|" >> $GITHUB_STEP_SUMMARY
+          
+          # Check statuses
+          if [[ "${{ needs.matrix-job.result }}" == "success" ]]; then
+            for version in 14 16 18; do
+              echo "| $version | ✅ Success |" >> $GITHUB_STEP_SUMMARY
+            done
+          else
+            for version in 14 16 18; do
+              if [[ $version == "16" ]]; then
+                echo "| $version | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "| $version | ✅ Success |" >> $GITHUB_STEP_SUMMARY
+              fi
+            done
+          fi
