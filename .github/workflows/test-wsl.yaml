@@ -28,7 +28,7 @@ jobs:
         shell: wsl-bash {0}
         run: |
           cp "$(wslpath -a -u '${{ github.workspace }}/test.sh')" /home/runner/test.sh
-          chmod a+x /hom/runner/test.sh
+          chmod a+x /home/runner/test.sh
 
       - name: Run script
         shell: wsl-bash {0}
