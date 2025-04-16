@@ -9,6 +9,9 @@ jobs:
     name: Test WSL
     runs-on: windows-2025
     steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
       - name: Run on WSL
         uses: Vampire/setup-wsl@f40fb59d850112c9a292b0218bca8271305b9127
         with:
@@ -23,7 +26,7 @@ jobs:
 
       - name: Copy script
         run: |
-          wsl cp "$(wslpath -a -u '${{ github.workspace }}/test.sh" /home/runner/test.sh 
+          wsl cp "$(wslpath -a -u '${{ github.workspace }}/test.sh)" /home/runner/test.sh 
 
       - name: Test commands
         shell: wsl-bash {0}
