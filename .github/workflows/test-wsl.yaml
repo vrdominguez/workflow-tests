@@ -6,11 +6,15 @@ on:
 
 jobs:
   test-wsl-execution:
-    name: Test WSL
-    runs-on: windows-2022
+    name: Test WSL at ${{ matrix.runner }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [windows-2022, windows-2025, windows-11-arm]
     steps:
       - name: Run on WSL
-        uses: Vampire/setup-wsl@v4
+        uses: Vampire/setup-wsl@f40fb59d850112c9a292b0218bca8271305b9127
         with:
           distribution: Ubuntu-24.04
           set-as-default: true
