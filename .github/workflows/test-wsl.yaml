@@ -32,7 +32,6 @@ jobs:
 
       - name: Run script
         shell: wsl-bash {0}
-        working-directory: 
         run: |
           cd /home/runner
           bash test.sh
