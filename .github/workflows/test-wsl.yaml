@@ -35,5 +35,4 @@ jobs:
         working-directory: 
         run: |
           cd /home/runner
-          echo "Running from $(pwd)"
-          ./test.sh
+          bash test.sh
