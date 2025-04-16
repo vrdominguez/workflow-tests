@@ -18,14 +18,14 @@ jobs:
           wsl-conf: |
             [boot]
             systemd=true
-          wsl-shell-user: example
+          wsl-shell-user: runner
           wsl-version: 2
+
+      - name: Copy script
+        run: |
+          wsl cp "$(wslpath -a -u '${{ github.workspace }}/test.sh" /home/runner/test.sh 
 
       - name: Test commands
         shell: wsl-bash {0}
         run: |
-            whoami
-            echo $HOME
-            pwd
-            cat /etc/issue.net
-            uname -a
+          bash test.sh
